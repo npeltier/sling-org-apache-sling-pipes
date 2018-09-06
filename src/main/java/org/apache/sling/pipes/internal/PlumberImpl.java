@@ -137,6 +137,7 @@ public class PlumberImpl implements Plumber, JobConsumer, PlumberMXBean {
      */
     protected void registerPipes(){
         registerPipe(ContainerPipe.RESOURCE_TYPE, ContainerPipe.class);
+        registerPipe(ThreadedPipe.RESOURCE_TYPE, ThreadedPipe.class);
         for (Method method : PipeBuilder.class.getDeclaredMethods()){
             PipeExecutor executor = method.getAnnotation(PipeExecutor.class);
             if (executor != null){

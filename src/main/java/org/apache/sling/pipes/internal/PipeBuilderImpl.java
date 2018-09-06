@@ -50,6 +50,7 @@ import java.util.UUID;
 import static org.apache.sling.jcr.resource.JcrResourceConstants.NT_SLING_FOLDER;
 import static org.apache.sling.jcr.resource.JcrResourceConstants.NT_SLING_ORDERED_FOLDER;
 import static org.apache.sling.jcr.resource.JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY;
+import static org.apache.sling.pipes.internal.ThreadedPipe.PN_NUM_THREADS;
 
 import static org.apache.sling.pipes.internal.CommandUtil.checkArguments;
 import static org.apache.sling.pipes.internal.CommandUtil.writeToMap;
@@ -374,6 +375,17 @@ public class PipeBuilderImpl implements PipeBuilder {
     public Job runAsync(Map bindings) throws PersistenceException {
         Pipe pipe = this.build();
         return plumber.executeAsync(resolver, pipe.getResource().getPath(), bindings);
+    }
+
+    @Override
+    public ExecutionResult runParallel(int numThreads) throws Exception {
+        JsonWriter writer = new JsonWriter();
+        writer.starts();
+        Pipe pipe = this.build();
+        ThreadedPipe threadedPipe = new ThreadedPipe(plumber, pipe.getResource(), pipe.getBindings());
+        Map bindings = new HashMap() {{put(PN_NUM_THREADS, numThreads);}};
+        pipe.setParent(threadedPipe);
+        return plumber.execute(resolver, threadedPipe, bindings,  writer , true);
     }
 
     /**
