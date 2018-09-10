@@ -2,7 +2,7 @@
   "jcr:primaryType":"nt:unstructured",
   "strainedExecutor": {
     "jcr:primaryType":"nt:unstructured",
-    "sling:resourceType":"slingPipes/executor",
+    "sling:resourceType":"slingPipes/manifold",
     "jcr:description":"10 sub-pipes to join output from; fewer threads than pipes, small queues",
     "numThreads":2,
     "queueSize":2,
@@ -133,7 +133,7 @@
   "defaultExecutor": {
     "jcr:primaryType": "nt:unstructured",
     "jcr:description": "more threads than pipes, sufficient queue capacity",
-    "sling:resourceType": "slingPipes/executor",
+    "sling:resourceType": "slingPipes/manifold",
     "conf": {
       "jcr:primaryType": "sling:OrderedFolder",
       "pipe0":{
