@@ -30,7 +30,7 @@ import org.junit.Test;
 /**
  * testing executor with dummy child pipes
  */
-public class ThreadedPipeTest extends AbstractPipeTest {
+public class ManifoldPipeTest extends AbstractPipeTest {
 
     public static final String NN_DEFAULT = "defaultExecutor";
     public static final String NN_STRAINED = "strainedExecutor";
@@ -57,5 +57,21 @@ public class ThreadedPipeTest extends AbstractPipeTest {
              numResults++;
         }
         assertEquals("All the sub-pipes output should be present exactly once in Executor output", 10*6, numResults);
+    }
+
+    @Test
+    public void testStrainedFromReference() throws Exception {
+        ExecutionResult result = plumber.newPipe(context.resourceResolver()).ref(PATH_PIPE + "/" + NN_STRAINED).run();
+        assertEquals("All the sub-pipes output should be present exactly once in Executor output", 10*6, result.size());
+    }
+
+    @Test
+    public void testBuilder() throws Exception {
+        ExecutionResult result = plumber.newPipe(context.resourceResolver())
+                .echo(PATH_APPLE)
+                .echo(PATH_BANANA)
+                .runParallel(2, null);
+        assertEquals("There should be 2 outputs", 2, result.size());
+        assertTrue("Should contain both fruits", result.toString().contains(PATH_APPLE) && result.toString().contains(PATH_BANANA));
     }
 }

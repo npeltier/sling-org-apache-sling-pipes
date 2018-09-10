@@ -50,7 +50,7 @@ import java.util.UUID;
 import static org.apache.sling.jcr.resource.JcrResourceConstants.NT_SLING_FOLDER;
 import static org.apache.sling.jcr.resource.JcrResourceConstants.NT_SLING_ORDERED_FOLDER;
 import static org.apache.sling.jcr.resource.JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY;
-import static org.apache.sling.pipes.internal.ThreadedPipe.PN_NUM_THREADS;
+import static org.apache.sling.pipes.internal.ManifoldPipe.PN_NUM_THREADS;
 
 import static org.apache.sling.pipes.internal.CommandUtil.checkArguments;
 import static org.apache.sling.pipes.internal.CommandUtil.writeToMap;
@@ -378,14 +378,13 @@ public class PipeBuilderImpl implements PipeBuilder {
     }
 
     @Override
-    public ExecutionResult runParallel(int numThreads) throws Exception {
-        JsonWriter writer = new JsonWriter();
-        writer.starts();
-        Pipe pipe = this.build();
-        ThreadedPipe threadedPipe = new ThreadedPipe(plumber, pipe.getResource(), pipe.getBindings());
+    public ExecutionResult runParallel(int numThreads, Map additionalBindings) throws Exception {
+        containerStep.setType(ManifoldPipe.RESOURCE_TYPE);
         Map bindings = new HashMap() {{put(PN_NUM_THREADS, numThreads);}};
-        pipe.setParent(threadedPipe);
-        return plumber.execute(resolver, threadedPipe, bindings,  writer , true);
+        if (additionalBindings != null){
+            bindings.putAll(additionalBindings);
+        }
+        return run(bindings);
     }
 
     /**
@@ -397,6 +396,10 @@ public class PipeBuilderImpl implements PipeBuilder {
         Map<String, Map> confs = new HashMap<>();
         Step(String type){
             properties = new HashMap();
+            setType(type);
+        }
+
+        void setType(String type){
             properties.put(SLING_RESOURCE_TYPE_PROPERTY, type);
         }
     }

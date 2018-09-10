@@ -19,6 +19,7 @@ package org.apache.sling.pipes.internal;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.pipes.ExecutionResult;
 import org.apache.sling.pipes.OutputWriter;
 import org.apache.sling.pipes.Pipe;
 import org.apache.sling.pipes.PipeBindings;
@@ -40,12 +42,12 @@ import org.slf4j.LoggerFactory;
  * the output of the children pipes is merged;
  * if execution is parallel, merge ordering is random;
  * duplicate resources are kept in the output
- * ThreadedPipe uses a thread pool to run its subpipes, but is NOT itself thread-safe
+ * ManifoldPipe uses a thread pool to run its subpipes, but is NOT itself thread-safe
  */
-public class ThreadedPipe extends SuperPipe {
-    private static final Logger log = LoggerFactory.getLogger(ThreadedPipe.class);
+public class ManifoldPipe extends SuperPipe {
+    private static final Logger log = LoggerFactory.getLogger(ManifoldPipe.class);
 
-    public static final String RESOURCE_TYPE = "slingPipes/executor";
+    public static final String RESOURCE_TYPE = "slingPipes/manifold";
     public static final String PN_QUEUE_SIZE = "queueSize";
     public static final String PN_NUM_THREADS = "numThreads";
     public static final String PN_EXECUTION_TIMEOUT = "executionTimeout";
@@ -66,7 +68,7 @@ public class ThreadedPipe extends SuperPipe {
      * @param upperBindings pipe bindings
      * @throws Exception bad configuration handling
      */
-    public ThreadedPipe(Plumber plumber, Resource resource, PipeBindings upperBindings) throws Exception{
+    public ManifoldPipe(Plumber plumber, Resource resource, PipeBindings upperBindings) throws Exception{
         super(plumber, resource, upperBindings);
         int queueSize = properties.get(PN_QUEUE_SIZE, QUEUE_SIZE_DEFAULT);
         numThreads = properties.get(PN_NUM_THREADS, NUM_THREADS_DEFAULT);
@@ -139,6 +141,7 @@ public class ThreadedPipe extends SuperPipe {
     private class ConcurrentIterator implements Iterator<Resource> {
 
         private ExecutorService executorService;
+        private Callable<ExecutionResult> callables;
         private Resource nextItem = null;
 
         private class StreamTerminator implements Runnable {
