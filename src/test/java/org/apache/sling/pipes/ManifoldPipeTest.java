@@ -24,7 +24,10 @@ import java.util.Iterator;
 
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -35,9 +38,13 @@ public class ManifoldPipeTest extends AbstractPipeTest {
     public static final String NN_DEFAULT = "defaultExecutor";
     public static final String NN_STRAINED = "strainedExecutor";
 
+
+
     @Before
     public void setup() throws PersistenceException {
         super.setup();
+        context = new SlingContext(ResourceResolverType.JCR_OAK);
+        context.load().json("/SLING-INF/jcr_root/content/fruits.json", PATH_FRUITS);
         context.load().json("/threaded.json", PATH_PIPE);
     }
 
