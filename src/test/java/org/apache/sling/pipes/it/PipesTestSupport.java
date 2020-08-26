@@ -27,6 +27,7 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.auth.core.AuthenticationSupport;
 import org.apache.sling.pipes.Plumber;
 import org.apache.sling.resource.presence.ResourcePresence;
+import org.apache.sling.testing.paxexam.SlingOptions;
 import org.apache.sling.testing.paxexam.SlingVersionResolver;
 import org.apache.sling.testing.paxexam.TestSupport;
 import org.ops4j.pax.exam.Configuration;
@@ -106,6 +107,7 @@ public abstract class PipesTestSupport extends TestSupport {
         final String workingDirectory = workingDirectory();
         return composite(
             slingQuickstartOakTar(workingDirectory, httpPort),
+            SlingOptions.logback(),
             slingEvent(),
             slingDistribution(),
             slingQuery(),
